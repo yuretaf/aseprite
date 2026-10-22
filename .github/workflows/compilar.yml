@@ -13,8 +13,8 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: Configurar Ninja
-      uses: ninja-build/action@v2
+    - name: Garantir Ninja
+      run: choco install ninja --no-progress
 
     - name: Descarregar Skia pre-compilada
       shell: bash

@@ -4,32 +4,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  compilar:
     runs-on: windows-latest
-
     steps:
     - name: Obter codigo-fonte
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
-    - name: Garantir Ninja
-      run: choco install ninja --no-progress
+    - name: Configurar Ninja Oficial
+      uses: aseprite/get-ninja@main
 
-    - name: Descarregar Skia pre-compilada
+    - name: Configurar Compilador MSVC
+      uses: TheMrMilchmann/setup-msvc-dev@v4
+      with:
+        arch: x64
+
+    - name: Compilar Automaticamente
       shell: bash
       run: |
-        curl -L -o skia.zip https://github.com/aseprite/skia/releases/download/m102-861e774383/Skia-Windows-Release-x64.zip
-        7z x skia.zip -o$GITHUB_WORKSPACE/skia
+        bash build.sh --auto --norun
 
-    - name: Compilar Aseprite
-      shell: cmd
-      run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLAF_BACKEND=skia -DSKIA_DIR=%GITHUB_WORKSPACE%\skia -DSKIA_LIBRARY_DIR=%GITHUB_WORKSPACE%\skia\out\Release-x64 -DSKIA_LIBRARY=%GITHUB_WORKSPACE%\skia\out\Release-x64\skia.lib
-        cmake --build build --target aseprite
-
-    - name: Disponibilizar para Download (Artifact)
+    - name: Disponibilizar para Download
       uses: actions/upload-artifact@v4
       with:
         name: Aseprite-Windows-x64
